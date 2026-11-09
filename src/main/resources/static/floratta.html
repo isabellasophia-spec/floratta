@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f5f7f0">
+  <title>Floratta | Catálogo de flores</title>
+  <link rel="stylesheet" href="floratta.css">
+  <script src="floratta.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="Floratta - início">
+      <span class="brand-mark">✿</span>
+      <span>floratta<span class="brand-dot">.</span><small>CATÁLOGO BOTÂNICO</small></span>
+    </a>
+    <nav><a href="#catalogo">Catálogo</a><a href="#cadastro">Adicionar flor</a></nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-copy">
+        <span class="eyebrow">UM JARDIM DE DESCOBERTAS</span>
+        <h1>Flores que contam<br><em>histórias.</em></h1>
+        <p>Explore espécies, descubra suas características e encontre os cuidados ideais para cada flor.</p>
+        <a class="primary-link" href="#catalogo">Explorar catálogo <span>→</span></a>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="art-circle"></div><div class="art-leaf leaf-one"></div><div class="art-leaf leaf-two"></div>
+        <div class="art-flower"><span>✿</span></div>
+        <span class="art-caption">cultive beleza<br>todos os dias</span>
+      </div>
+    </section>
+
+    <section class="content-section" id="catalogo">
+      <div class="section-heading">
+        <div><span class="eyebrow">CONHEÇA E CULTIVE</span><h2>Nosso catálogo</h2></div>
+        <span class="count" id="flower-count">0 flores</span>
+      </div>
+      <div class="toolbar">
+        <label class="search-box"><span>⌕</span><input id="search-input" type="search" placeholder="Buscar flor pelo nome..." aria-label="Buscar flor pelo nome"></label>
+        <button class="button button-outline" id="refresh-button" type="button">↻ Atualizar</button>
+      </div>
+      <div id="status-message" class="status" role="status">Carregando flores...</div>
+      <div class="flower-grid" id="flower-grid"></div>
+      <div class="empty-state hidden" id="empty-state">
+        <span>❀</span><h3>Nenhuma flor encontrada</h3><p>Experimente outro nome ou cadastre uma nova flor.</p>
+      </div>
+    </section>
+
+    <section class="form-section" id="cadastro">
+      <div class="form-intro">
+        <span class="eyebrow">SEU JARDIM COMEÇA AQUI</span>
+        <h2>Adicione uma<br><em>nova flor.</em></h2>
+        <p>Registre uma espécie e compartilhe as informações necessárias para que ela floresça.</p>
+        <div class="form-note">✿ Cada flor tem seu próprio jeito de florescer.</div>
+      </div>
+      <form id="flower-form" class="flower-form">
+        <div class="form-top"><div><span class="eyebrow">CADASTRO BOTÂNICO</span><h3 id="form-title">Nova flor</h3></div><span class="form-icon">✿</span></div>
+        <input type="hidden" id="original-name">
+        <div class="field-row">
+          <label>Nome da flor *<input id="nome" name="nome" required maxlength="100" placeholder="Ex.: Rosa"></label>
+          <label>Espécie<input id="especie" name="especie" maxlength="120" placeholder="Ex.: Rosa gallica"></label>
+        </div>
+        <div class="field-row">
+          <label>Cor<input id="cor" name="cor" maxlength="60" placeholder="Ex.: Rosa-claro"></label>
+          <label>Tipo de solo<input id="tipoSolo" name="tipoSolo" maxlength="120" placeholder="Ex.: Rico em matéria orgânica"></label>
+        </div>
+        <label>Descrição<textarea id="descricao" name="descricao" rows="3" placeholder="Conte um pouco sobre essa flor..."></textarea></label>
+        <div class="field-row">
+          <label>Iluminação<input id="iluminacao" name="iluminacao" maxlength="120" placeholder="Ex.: Sol pleno"></label>
+          <label>Rega<input id="rega" name="rega" maxlength="120" placeholder="Ex.: 2 a 3 vezes por semana"></label>
+        </div>
+        <div class="form-actions">
+          <button class="button button-primary" id="save-button" type="submit">Salvar flor <span>→</span></button>
+          <button class="button button-text hidden" id="cancel-edit" type="button">Cancelar edição</button>
+        </div>
+        <p class="form-feedback" id="form-feedback" role="status"></p>
+      </form>
+    </section>
+  </main>
+
+  <footer><a class="footer-brand" href="#">✿ floratta.</a><span>Um espaço para florescer conhecimento.</span><span>© 2026 Floratta</span></footer>
+
+  <dialog id="details-dialog" class="details-dialog">
+    <button class="dialog-close" id="close-dialog" aria-label="Fechar" type="button">×</button>
+    <span class="eyebrow">FICHA BOTÂNICA</span>
+    <h2 id="detail-name"></h2>
+    <p class="detail-species" id="detail-species"></p>
+    <p id="detail-description"></p>
+    <div class="detail-list" id="detail-list"></div>
+    <div class="dialog-actions"><button class="button button-outline" id="detail-edit" type="button">Editar</button><button class="button button-danger" id="detail-delete" type="button">Excluir</button></div>
+  </dialog>
+</body>
+</html>

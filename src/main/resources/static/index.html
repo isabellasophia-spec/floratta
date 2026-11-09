@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Floratta | Catálogo de Flores</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header class="hero">
+    <div class="hero-content">
+        <p class="eyebrow">UM GUIA PARA CULTIVAR BELEZA</p>
+        <h1>Floratta<span>✿</span></h1>
+        <p class="subtitle">Descubra flores, conheça suas histórias e aprenda a cuidar delas.</p>
+        <a class="hero-link" href="#catalogo">Explorar catálogo ↓</a>
+    </div>
+    <div class="hero-flower" aria-hidden="true">✿</div>
+</header>
+<main class="container">
+    <section class="intro">
+        <div>
+            <p class="eyebrow">SEU CANTINHO BOTÂNICO</p>
+            <h2>Flores que florescem com cuidado</h2>
+            <p>Guarde suas espécies favoritas e mantenha as dicas de cultivo sempre por perto.</p>
+        </div>
+        <div class="stat"><strong id="totalFlores">0</strong><span>flores no catálogo</span></div>
+    </section>
+
+    <section class="form-section" id="formulario">
+        <div class="section-heading">
+            <div><p class="eyebrow">CULTIVE SEU CATÁLOGO</p><h2 id="formTitulo">Adicionar uma flor</h2></div>
+            <span class="leaf">❧</span>
+        </div>
+        <form id="florForm">
+            <input type="hidden" id="florId">
+            <div class="form-grid">
+                <label>Nome da flor *<input id="nome" required maxlength="120" placeholder="Ex.: Rosa"></label>
+                <label>Espécie<input id="especie" placeholder="Ex.: Rosa gallica"></label>
+                <label>Cor<input id="cor" placeholder="Ex.: Rosa-claro"></label>
+                <label>URL da imagem<input id="urlImagem" type="url" placeholder="https://... (opcional)"></label>
+                <label class="wide">Descrição<textarea id="descricao" rows="2" placeholder="Conte um pouco sobre essa flor..."></textarea></label>
+                <label>Iluminação<input id="iluminacao" placeholder="Ex.: Luz indireta abundante"></label>
+                <label>Rega<input id="rega" placeholder="Ex.: Regar quando o solo secar"></label>
+                <label class="wide">Tipo de solo<input id="tipoSolo" placeholder="Ex.: Fértil e bem drenado"></label>
+            </div>
+            <div class="form-actions">
+                <button class="button-primary" type="submit" id="salvarBtn">Salvar flor</button>
+                <button class="button-secondary hidden" type="button" id="cancelarBtn">Cancelar edição</button>
+                <span id="mensagem" role="status"></span>
+            </div>
+        </form>
+    </section>
+
+    <section id="catalogo" class="catalog-section">
+        <div class="section-heading">
+            <div><p class="eyebrow">INSPIRAÇÃO NATURAL</p><h2>Nosso catálogo</h2></div>
+            <span class="leaf">✿</span>
+        </div>
+        <div id="galeriaFlores" class="galeria"></div>
+        <p id="vazio" class="empty-state">Seu catálogo está começando a florescer. Adicione a primeira flor acima. 🌱</p>
+    </section>
+</main>
+<footer><span>Floratta</span> · Cultivando conhecimento, uma flor de cada vez.</footer>
+<script>
+const api = '/api/flores';
+const form = document.getElementById('florForm');
+const campos = ['nome', 'especie', 'cor', 'urlImagem', 'descricao', 'iluminacao', 'rega', 'tipoSolo'];
+const mensagem = document.getElementById('mensagem');
+
+function obterDados() {
+    return Object.fromEntries(campos.map(campo => [campo, document.getElementById(campo).value.trim() || null]));
+}
+function texto(tag, classe, conteudo) {
+    const el = document.createElement(tag);
+    if (classe) el.className = classe;
+    el.textContent = conteudo || '';
+    return el;
+}
+function detalhe(card, rotulo, valor) {
+    if (!valor) return;
+    const p = document.createElement('p');
+    const strong = document.createElement('strong');
+    strong.textContent = rotulo + ': ';
+    p.append(strong, document.createTextNode(valor));
+    card.appendChild(p);
+}
+async function carregarFlores() {
+    try {
+        const resposta = await fetch(api);
+        if (!resposta.ok) throw new Error('Não foi possível carregar o catálogo.');
+        const flores = await resposta.json();
+        const galeria = document.getElementById('galeriaFlores');
+        galeria.replaceChildren();
+        document.getElementById('totalFlores').textContent = flores.length;
+        document.getElementById('vazio').classList.toggle('hidden', flores.length > 0);
+        flores.forEach(flor => {
+            const card = document.createElement('article');
+            card.className = 'flor-card';
+            if (flor.urlImagem) {
+                const img = document.createElement('img');
+                img.src = flor.urlImagem;
+                img.alt = flor.nome;
+                img.loading = 'lazy';
+                img.onerror = () => { img.remove(); card.classList.add('no-image'); };
+                card.appendChild(img);
+            } else {
+                card.appendChild(texto('div', 'image-placeholder', '✿'));
+            }
+            const body = document.createElement('div'); body.className = 'card-body';
+            body.appendChild(texto('p', 'card-kicker', flor.especie || 'ESPÉCIE BOTÂNICA'));
+            body.appendChild(texto('h3', '', flor.nome));
+            if (flor.cor) body.appendChild(texto('span', 'color-tag', flor.cor));
+            if (flor.descricao) body.appendChild(texto('p', 'description', flor.descricao));
+            detalhe(body, 'Luz', flor.iluminacao);
+            detalhe(body, 'Rega', flor.rega);
+            detalhe(body, 'Solo', flor.tipoSolo);
+            const actions = document.createElement('div'); actions.className = 'card-actions';
+            const edit = texto('button', 'button-secondary', 'Editar'); edit.type = 'button';
+            edit.addEventListener('click', () => editarFlor(flor));
+            const del = texto('button', 'button-danger', 'Excluir'); del.type = 'button';
+            del.addEventListener('click', () => excluirFlor(flor.nome));
+            actions.append(edit, del); body.appendChild(actions); card.appendChild(body); galeria.appendChild(card);
+        });
+    } catch (e) { mostrarMensagem(e.message, true); }
+}
+function editarFlor(flor) {
+    document.getElementById('florId').value = flor.nome;
+    campos.forEach(campo => document.getElementById(campo).value = flor[campo] || '');
+    document.getElementById('formTitulo').textContent = 'Editar flor';
+    document.getElementById('salvarBtn').textContent = 'Salvar alterações';
+    document.getElementById('cancelarBtn').classList.remove('hidden');
+    document.getElementById('formulario').scrollIntoView({behavior: 'smooth'});
+}
+function limparFormulario() {
+    form.reset(); document.getElementById('florId').value = '';
+    document.getElementById('formTitulo').textContent = 'Adicionar uma flor';
+    document.getElementById('salvarBtn').textContent = 'Salvar flor';
+    document.getElementById('cancelarBtn').classList.add('hidden');
+}
+function mostrarMensagem(texto, erro = false) {
+    mensagem.textContent = texto;
+    mensagem.className = erro ? 'message error' : 'message success';
+}
+form.addEventListener('submit', async e => {
+    e.preventDefault();
+    const nomeAtual = document.getElementById('florId').value;
+    try {
+        const resposta = await fetch(nomeAtual ? `${api}/${encodeURIComponent(nomeAtual)}` : api, {
+            method: nomeAtual ? 'PUT' : 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(obterDados())
+        });
+        if (!resposta.ok) throw new Error('Não foi possível salvar. Verifique os campos e a conexão com o servidor.');
+        limparFormulario(); mostrarMensagem(nomeAtual ? 'Flor atualizada com carinho!' : 'Flor adicionada ao catálogo!');
+        await carregarFlores();
+    } catch (e) { mostrarMensagem(e.message, true); }
+});
+document.getElementById('cancelarBtn').addEventListener('click', limparFormulario);
+async function excluirFlor(nome) {
+    if (!confirm(`Deseja excluir ${nome} do catálogo?`)) return;
+    try {
+        const resposta = await fetch(`${api}/${encodeURIComponent(nome)}`, {method: 'DELETE'});
+        if (!resposta.ok) throw new Error('Não foi possível excluir a flor.');
+        mostrarMensagem('Flor removida do catálogo.'); await carregarFlores();
+    } catch (e) { mostrarMensagem(e.message, true); }
+}
+carregarFlores();
+</script>
+</body>
+</html>
